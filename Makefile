@@ -11,7 +11,6 @@ BINARY_NAME := apk-crawler
 prepare:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3
 	go env -w CGO_ENABLED=1
 
 ## help: print this help message
@@ -44,7 +43,7 @@ tidy:
 audit:
 	go mod verify
 	go vet ./...
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3 run ./...
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1 run ./...
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 	go test -race -buildvcs -vet=off ./...
 
@@ -73,7 +72,7 @@ test/cover:
 build:
 	go build -o=${TMP_DIR}/bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
 
-## run: run the  application
+## run: run the application
 .PHONY: run
 run: build
 	${TMP_DIR}/bin/${BINARY_NAME}
