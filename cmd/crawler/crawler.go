@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	"github.com/pokeguys/apk-crawler/cmd/cralwer/config"
+	"github.com/pokeguys/apk-crawler/cmd/crawler/config"
 	"github.com/pokeguys/apk-crawler/sources"
 )
 
