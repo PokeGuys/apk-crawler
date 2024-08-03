@@ -17,9 +17,11 @@ func TestNewCrawlerStrategyValid(t *testing.T) {
 
 func TestNewCrawlerStrategyInvalid(t *testing.T) {
 	// Test with an invalid source
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected a panic, got nil")
+		}
+	}()
 	source := "invalid"
-	strategy := sources.NewCrawlerStrategy(source, nil)
-	if strategy != nil {
-		t.Errorf("Expected a nil strategy, got %v", strategy)
-	}
+	sources.NewCrawlerStrategy(source, nil)
 }
