@@ -1,0 +1,12 @@
+.git/
+.idea/
+scripts/
+.air.toml
+.dockerignore
+.editorconfig
+.gitattributes
+.gitignore
+.golangci.yml
+Dockerfile
+LICENSE
+README.md

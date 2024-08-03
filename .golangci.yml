@@ -1,0 +1,35 @@
+run:
+  go: "1.22"
+  timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - errorlint
+    - gocritic
+    - godot
+    - gofumpt
+    - goimports
+    - misspell
+    - nolintlint
+    - perfsprint
+    - predeclared
+    - revive
+    - testifylint
+    - unconvert
+    - unused
+    - usestdlibvars
+    - whitespace
+    - loggercheck
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters-settings:
+  goimports:
+    local-prefixes: github.com/pokeguys/apk-crawler
+  gofumpt:
+    extra-rules: true
+  nolintlint:
+    allow-unused: false
