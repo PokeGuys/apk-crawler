@@ -11,14 +11,6 @@ var Sources = map[CrawlerSource]string{
 	ApkPure: "apkpure",
 }
 
-func GetSources() []string {
-	sources := make([]string, len(Sources))
-	for source, name := range Sources {
-		sources[source] = name
-	}
-	return sources
-}
-
 // GetSource returns the source name.
 func GetSource(source CrawlerSource) string {
 	return Sources[source]
