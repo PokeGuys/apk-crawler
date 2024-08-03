@@ -9,6 +9,7 @@ BINARY_NAME := apk-crawler
 
 .PHONY: prepare
 prepare:
+	mkdir -p ${TMP_DIR}/bin
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 	go env -w CGO_ENABLED=1
@@ -64,7 +65,8 @@ test:
 ## test/cover: run all tests and display coverage
 .PHONY: test/cover
 test/cover:
-	go test -v -race -buildvcs -coverprofile=${TMP_DIR}/coverage.out ./...
+	go test -v -race -buildvcs -coverprofile=${TMP_DIR}/coverage.out.tmp ./...
+	cat ${TMP_DIR}/coverage.out.tmp | grep -v ".pb.go" | grep -v "cmd/crawler/" > ${TMP_DIR}/coverage.out
 	go tool cover -html=${TMP_DIR}/coverage.out
 
 ## build: build the application
