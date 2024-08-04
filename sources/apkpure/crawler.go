@@ -2,7 +2,6 @@ package apkpure
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
@@ -29,7 +28,7 @@ func (c *Crawler) Crawl(packageName string) ([]apkcrawler.Apk, error) {
 	// 2. Decode the response using the protobuf library.
 	// 3. Iterate over the response and extract the apk information.
 	// 4. Return the extracted apk information.
-	resp, err := c.client.R().SetHeaders(c.header()).Get(c.url(packageName))
+	resp, err := c.client.R().SetHeaders(c.header()).Get(c.URL(packageName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
@@ -41,32 +40,33 @@ func (c *Crawler) Crawl(packageName string) ([]apkcrawler.Apk, error) {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
+	// Check if the response is empty
+	// All the dot are nullable
+	apks := make([]apkcrawler.Apk, 0)
+	if apiResult.Data == nil || apiResult.Data.Detail == nil || apiResult.Data.Detail.ApplicationVersion == nil {
+		return apks, nil
+	}
+
 	// Transform the protobuf response into a list of Apk objects
-	apks := make([]apkcrawler.Apk, 0, len(apiResult.Data.Detail.ApplicationVersion))
 	for _, app := range apiResult.Data.Detail.ApplicationVersion {
 		// Skip the application if it's not APK
 		if strings.ToUpper(app.Result.Data.Download.Type) != "APK" {
 			continue
 		}
 		apks = append(apks, apkcrawler.Apk{
-			Name:      app.Result.Data.Name,
-			Version:   app.Result.Data.Version,
-			Size:      app.Result.Data.Download.Size,
-			URL:       app.Result.Data.Download.Url,
-			Hash:      app.Result.Data.Download.Hash,
-			CreatedAt: app.Result.Data.Download.CreatedAt,
+			Name:    app.Result.Data.Name,
+			Package: app.Result.Data.Package,
+			Version: app.Result.Data.Version,
+			Size:    app.Result.Data.Download.Size,
+			URL:     app.Result.Data.Download.Url,
+			Hash:    app.Result.Data.Download.Sha1,
 		})
 	}
-
-	// Sort the apks by timestamp (newest first)
-	sort.Slice(apks, func(i, j int) bool {
-		return apks[i].CreatedAt < apks[j].CreatedAt
-	})
-
+	// The response is already sorted in descending order
 	return apks, nil
 }
 
-func (c *Crawler) url(packageName string) string {
+func (c *Crawler) URL(packageName string) string {
 	return fmt.Sprintf(APIURL, packageName)
 }
 
