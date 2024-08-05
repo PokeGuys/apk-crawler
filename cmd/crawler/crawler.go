@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/go-resty/resty/v2"
 
@@ -11,14 +12,23 @@ import (
 )
 
 func main() {
-	cfg := config.NewConfig()
+	args := os.Args[1:]
+	if len(args) < 1 {
+		fmt.Printf("Usage: %s <source> [flags]\n", os.Args[0])
+		os.Exit(1)
+	}
+
+	client := resty.New()
+	cfg := config.NewConfig(args)
 
 	// Setup the http client for the crawler
-	client := resty.New()
-	crawler := sources.NewCrawlerStrategy(cfg.Source, client)
+	crawler, err := sources.NewCrawlerStrategy(cfg.Source, client)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	// Crawl the package
-	apk, err := crawler.Crawl(cfg.Package)
+	apk, err := crawler.Crawl(cfg.Package, cfg.ApkType)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

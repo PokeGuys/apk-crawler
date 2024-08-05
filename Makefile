@@ -12,6 +12,7 @@ prepare:
 	mkdir -p ${TMP_DIR}/bin
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+	go install github.com/vektra/mockery/v2@v2.44.1
 	go env -w CGO_ENABLED=1
 
 ## help: print this help message
@@ -56,6 +57,10 @@ audit:
 proto:
 	@protoc --go_out=. --go_opt=paths=source_relative ./proto/*.proto
 
+.PHONY: mocks
+mocks:
+	@mockery --all
+
 ## test: run all tests
 .PHONY: test
 test:
@@ -65,7 +70,7 @@ test:
 .PHONY: test/cover
 test/cover:
 	go test -v -race -buildvcs -coverprofile=${TMP_DIR}/coverage.out.tmp ./...
-	cat ${TMP_DIR}/coverage.out.tmp | grep -v ".pb.go" | grep -v "cmd/crawler/" > ${TMP_DIR}/coverage.out
+	cat ${TMP_DIR}/coverage.out.tmp | grep -Ev "mock_|mocks/|cmd/|.pb.go" > ${TMP_DIR}/coverage.out
 	go tool cover -html=${TMP_DIR}/coverage.out
 
 ## build: build the application

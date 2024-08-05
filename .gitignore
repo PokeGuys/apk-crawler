@@ -22,3 +22,7 @@
 
 # Temporary files
 tmp/
+
+# Mockery
+mocks/*
+!mocks/.gitkeep

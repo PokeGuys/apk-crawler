@@ -3,73 +3,28 @@ package apkpure_test
 import (
 	"testing"
 
-	"github.com/go-resty/resty/v2"
-	"github.com/jarcoal/httpmock"
-	"google.golang.org/protobuf/proto"
-
+	mocks "github.com/pokeguys/apk-crawler/mocks/github.com/pokeguys/apk-crawler/sources/apkpure/apkpurehttp"
 	pb "github.com/pokeguys/apk-crawler/proto"
 	"github.com/pokeguys/apk-crawler/sources/apkpure"
+	"github.com/pokeguys/apk-crawler/sources/apkpure/apkpurehttp"
 )
 
-func mockApkPureResponse(packageName, apkType string, count int) *pb.ApkPureResponse {
-	apiResult := pb.ApkPureResponse{
-		Data: &pb.ApkPureResponseData{
-			Detail: &pb.ApkPureResponseDetail{},
-		},
-	}
-	for i := 0; i < count; i++ {
-		apiResult.Data.Detail.ApplicationVersion = append(
-			apiResult.Data.Detail.ApplicationVersion,
-			&pb.ApkPureApplicationVersion{
-				Result: &pb.ApkPureApplicationSearchResult{
-					Data: &pb.ApkPureApplicationVersionData{
-						Name:         "Example App",
-						DisplayName:  "Example App",
-						Package:      packageName,
-						MinorVersion: "1.0",
-						Version:      "1.0.0",
-						Hash:         "1234567890",
-						Description:  "This is an example app",
-						PatchNotes:   "This is an example app",
-						Status:       "Published",
-						Developer:    "Example Developer",
-						Download: &pb.ApkPureApplicationDownload{
-							Name:       "Example App",
-							Sha1:       "1234567890",
-							Size:       1024,
-							TorrentUrl: "https://example.com/example.apk",
-							TrackerUrl: "https://example.com/example.apk",
-							Type:       apkType,
-							Url:        "https://example.com/example.apk",
-						},
-					},
-				},
-			},
-		)
-	}
-	return &apiResult
-}
-
 func TestCrawler_Crawl(t *testing.T) {
-	client := resty.New()
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-	crawler := apkpure.NewApkPureCrawler(client)
-
-	// Marshal a protobuf response
+	client := &mocks.MockClient{}
 	packageName := "com.example.app"
-	apiResponse := mockApkPureResponse(packageName, "APK", 5)
-	response, err := proto.Marshal(apiResponse)
+	sdkVersion := "29"
+	abis := "x86,armeabi-v7a,arm64-v8a,x86_64"
+	client.On("GetVersions", sdkVersion, abis, packageName).Return(apkpurehttp.MockApkPureResponse(packageName, "APK", 5), nil)
+
+	// Test the crawler with a valid package name
+	crawler, err := apkpure.NewApkPureCrawler(apkpure.Config{
+		SDKVersion: sdkVersion,
+		Abis:       abis,
+	}, client)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
-
-	// Set the mock response
-	httpmock.RegisterResponder("GET", crawler.URL(packageName),
-		httpmock.NewStringResponder(200, string(response)))
-
-	// Test the crawler with a valid package name
-	apks, err := crawler.Crawl("com.example.app")
+	apks, err := crawler.Crawl(packageName, "APK")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -86,24 +41,21 @@ func TestCrawler_Crawl(t *testing.T) {
 }
 
 func TestCrawler_CrawlAllXAPK(t *testing.T) {
-	client := resty.New()
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-	crawler := apkpure.NewApkPureCrawler(client)
-
-	// Marshal a protobuf response
+	client := &mocks.MockClient{}
 	packageName := "com.example.app"
-	response, err := proto.Marshal(mockApkPureResponse(packageName, "XAPK", 2))
+	sdkVersion := "29"
+	abis := "x86,armeabi-v7a,arm64-v8a,x86_64"
+	client.On("GetVersions", sdkVersion, abis, packageName).Return(apkpurehttp.MockApkPureResponse(packageName, "XAPK", 2), nil)
+
+	// Test the crawler with a valid package name
+	crawler, err := apkpure.NewApkPureCrawler(apkpure.Config{
+		SDKVersion: sdkVersion,
+		Abis:       abis,
+	}, client)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
-
-	// Set the mock response
-	httpmock.RegisterResponder("GET", crawler.URL(packageName),
-		httpmock.NewStringResponder(200, string(response)))
-
-	// Test the crawler with a valid package name
-	apks, err := crawler.Crawl("com.example.app")
+	apks, err := crawler.Crawl(packageName, "APK")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -115,22 +67,22 @@ func TestCrawler_CrawlAllXAPK(t *testing.T) {
 }
 
 func TestCrawler_CrawlEmptyResponse(t *testing.T) {
-	client := resty.New()
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-	crawler := apkpure.NewApkPureCrawler(client)
+	client := &mocks.MockClient{}
+	packageName := "com.example.app"
+	sdkVersion := "29"
+	abis := "x86,armeabi-v7a,arm64-v8a,x86_64"
 	var apiResult pb.ApkPureResponse
-	response, err := proto.Marshal(&apiResult)
+	client.On("GetVersions", sdkVersion, abis, packageName).Return(&apiResult, nil)
+	// Test the crawler with a valid package name
+
+	crawler, err := apkpure.NewApkPureCrawler(apkpure.Config{
+		SDKVersion: sdkVersion,
+		Abis:       abis,
+	}, client)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
-
-	// Set the mock response
-	httpmock.RegisterResponder("GET", crawler.URL("com.example.app"),
-		httpmock.NewStringResponder(200, string(response)))
-
-	// Test the crawler with a valid package name
-	apks, err := crawler.Crawl("com.example.app")
+	apks, err := crawler.Crawl(packageName, "APK")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
