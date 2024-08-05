@@ -57,6 +57,10 @@ audit:
 proto:
 	@protoc --go_out=. --go_opt=paths=source_relative ./proto/*.proto
 
+.PHONY: mocks
+mocks:
+	@mockery --all
+
 ## test: run all tests
 .PHONY: test
 test:
