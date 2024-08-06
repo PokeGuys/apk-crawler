@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "github.com/pokeguys/apk-crawler/proto";
+
+message ApkPureResponse {
+    ApkPureResponseData data = 1;
+}
+
+message ApkPureResponseData {
+    ApkPureResponseDetail detail = 7;
+}
+
+message ApkPureResponseDetail {
+    repeated ApkPureApplicationVersion applicationVersion = 2;
+}
+
+message ApkPureApplicationVersion {
+    string messageType = 1;
+    ApkPureApplicationSearchResult result = 3;
+}
+
+message ApkPureApplicationSearchResult {
+    ApkPureApplicationVersionData data = 2;
+}
+
+message ApkPureApplicationVersionData {
+    string name = 1;
+    string displayName = 2;
+    string package = 4;
+    string minorVersion = 5;
+    string version = 6;
+    string hash = 7;
+    string description = 10;
+    string patchNotes = 11;
+    string status = 12;
+    string developer = 13;
+    ApkPureApplicationDownload download = 24;
+}
+
+message ApkPureApplicationDownload {
+    string expiryDate = 1;
+    string name = 2;
+    string sha1 = 3;
+    int64 size = 4;
+    string torrentUrl = 6;
+    string trackerUrl = 7;
+    string type = 8;
+    string url = 9;
+    int64 expireData = 12;
+}

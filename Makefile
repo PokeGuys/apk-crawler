@@ -1,10 +1,19 @@
 # Change these variables as necessary.
-MAIN_PACKAGE_PATH := ./cmd/crawler
+MAIN_PACKAGE_PATH := ./cmd/crawler/
+TMP_DIR := ./tmp
 BINARY_NAME := apk-crawler
 
 # ==================================================================================== #
 # HELPERS
 # ==================================================================================== #
+
+.PHONY: prepare
+prepare:
+	mkdir -p ${TMP_DIR}/bin
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+	go install github.com/vektra/mockery/v2@v2.44.1
+	go env -w CGO_ENABLED=1
 
 ## help: print this help message
 .PHONY: help
@@ -36,9 +45,8 @@ tidy:
 audit:
 	go mod verify
 	go vet ./...
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3 run ./...
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1 run ./...
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-	go test -race -buildvcs -vet=off ./...
 
 
 # ==================================================================================== #
@@ -47,7 +55,11 @@ audit:
 
 .PHONY: proto
 proto:
-	@protoc --proto_path=./proto --go_out=:./proto ./proto/apkcrawler.proto
+	@protoc --go_out=. --go_opt=paths=source_relative ./proto/*.proto
+
+.PHONY: mocks
+mocks:
+	@mockery --all
 
 ## test: run all tests
 .PHONY: test
@@ -57,18 +69,19 @@ test:
 ## test/cover: run all tests and display coverage
 .PHONY: test/cover
 test/cover:
-	go test -v -race -buildvcs -coverprofile=/tmp/coverage.out ./...
-	go tool cover -html=/tmp/coverage.out
+	go test -v -race -buildvcs -coverprofile=${TMP_DIR}/coverage.out.tmp ./...
+	cat ${TMP_DIR}/coverage.out.tmp | grep -Ev "mock_|mocks/|cmd/|.pb.go" > ${TMP_DIR}/coverage.out
+	go tool cover -html=${TMP_DIR}/coverage.out
 
 ## build: build the application
 .PHONY: build
 build:
-	go build -o=/tmp/bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
+	go build -o=${TMP_DIR}/bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
 
-## run: run the  application
+## run: run the application
 .PHONY: run
 run: build
-	/tmp/bin/${BINARY_NAME}
+	${TMP_DIR}/bin/${BINARY_NAME}
 
 ## run/live: run the application with reloading on file changes
 .PHONY: run/live
@@ -88,4 +101,4 @@ push: tidy audit no-dirty
 ## production/deploy: deploy the application to production
 .PHONY: production/build
 production/build:
-	GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' -o=/tmp/bin/linux_amd64/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
+	GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' -o=${TMP_DIR}/bin/linux_amd64/${BINARY_NAME} ${MAIN_PACKAGE_PATH}

@@ -16,7 +16,7 @@ You can download the latest version of the tool from the [releases page](https:/
 To use the tool, you can run the following command:
 
 ```bash
-go run ./cmd/crawler -s <source> -u <url> -o <output>
+go run github.com/pokeguys/apk-crawler/cmd/crawler@dev -s <source> -p <package-name>
 ```
 
 The output will be a directory containing the extracted APK files.
