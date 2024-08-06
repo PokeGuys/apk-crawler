@@ -8,16 +8,18 @@ import (
 )
 
 type Config struct {
-	ApkType string
-	Source  sources.SourceConfig
-	Package string
-	ShowAll bool
+	ApkType   string
+	Source    sources.SourceConfig
+	Package   string
+	ShowAll   bool
+	PrintJSON bool
 }
 
 const (
-	defaultPackage = ""
-	defaultApkType = "APK"
-	defaultShowAll = false
+	defaultPackage   = ""
+	defaultApkType   = "APK"
+	defaultShowAll   = false
+	defaultPrintJSON = false
 )
 
 func NewConfig(args []string) Config {
@@ -46,6 +48,8 @@ func registerFlags(args []string, cfg *Config) {
 	fs.BoolVar(&cfg.ShowAll, "a", defaultShowAll, "Get all the versions of the package (alias)")
 	fs.StringVar(&cfg.ApkType, "type", defaultApkType, "The type of the package")
 	fs.StringVar(&cfg.ApkType, "t", defaultApkType, "The type of the package (alias)")
+	fs.BoolVar(&cfg.PrintJSON, "json", defaultPrintJSON, "Print the results in JSON format")
+	fs.BoolVar(&cfg.PrintJSON, "j", defaultPrintJSON, "Print the results in JSON format (alias)")
 
 	// Register the source-specific flags
 	if c, ok := sourceCfg.(apkpure.Config); ok {
