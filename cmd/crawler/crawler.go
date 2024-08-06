@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -36,11 +37,13 @@ func main() {
 
 	// Print the results in JSON format
 	if cfg.PrintJSON {
-		b, err := json.Marshal(apk)
-		if err != nil {
+		enc := json.NewEncoder(os.Stdout)
+		buf := new(bytes.Buffer)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(apk); err != nil {
 			log.Fatal(err.Error())
 		}
-		fmt.Println(string(b))
+		fmt.Println(string(buf.Bytes()))
 		return
 	}
 
