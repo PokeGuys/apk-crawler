@@ -49,8 +49,8 @@ func registerFlags(args []string, cfg *Config) {
 
 	// Register the source-specific flags
 	if c, ok := sourceCfg.(apkpure.Config); ok {
-		cfg.Source = c
 		apkpure.ParseFlags(fs, &c)
+		cfg.Source = c
 	}
 	fs.Parse(args[1:])
 }
