@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -31,6 +32,16 @@ func main() {
 	apk, err := crawler.Crawl(cfg.Package, cfg.ApkType)
 	if err != nil {
 		log.Fatal(err.Error())
+	}
+
+	// Print the results in JSON format
+	if cfg.PrintJSON {
+		b, err := json.Marshal(apk)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		fmt.Println(string(b))
+		return
 	}
 
 	// Print the results
