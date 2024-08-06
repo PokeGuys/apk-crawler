@@ -13,7 +13,7 @@ import (
 
 func main() {
 	args := os.Args[1:]
-	if len(args) < 1 {
+	if len(args) < 2 {
 		fmt.Printf("Usage: %s <source> [flags]\n", os.Args[0])
 		os.Exit(1)
 	}

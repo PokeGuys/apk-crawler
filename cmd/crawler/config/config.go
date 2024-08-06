@@ -22,16 +22,7 @@ const (
 
 func NewConfig(args []string) Config {
 	var cfg Config
-	source := args[0]
-	sourceCfg, err := sources.NewSourceConfig(source)
-	if err != nil {
-		panic(err.Error())
-	}
-	cfg.Source = sourceCfg
-
-	fs := flag.NewFlagSet(source, flag.ExitOnError)
-	registerFlags(fs, &cfg)
-	fs.Parse(args[2:])
+	registerFlags(args, &cfg)
 
 	// Validate the flags
 	message := validateFlags(cfg)
@@ -42,17 +33,26 @@ func NewConfig(args []string) Config {
 	return cfg
 }
 
-func registerFlags(fs *flag.FlagSet, cfg *Config) {
+func registerFlags(args []string, cfg *Config) {
 	// Register the common flags
+	sourceCfg, err := sources.NewSourceConfig(args[0])
+	if err != nil {
+		panic(err.Error())
+	}
+	fs := flag.NewFlagSet(sourceCfg.Name(), flag.ExitOnError)
+	fs.StringVar(&cfg.Package, "package", defaultPackage, "The package name")
+	fs.StringVar(&cfg.Package, "p", defaultPackage, "The package name (alias)")
 	fs.BoolVar(&cfg.ShowAll, "all", defaultShowAll, "Get all the versions of the package")
 	fs.BoolVar(&cfg.ShowAll, "a", defaultShowAll, "Get all the versions of the package (alias)")
 	fs.StringVar(&cfg.ApkType, "type", defaultApkType, "The type of the package")
 	fs.StringVar(&cfg.ApkType, "t", defaultApkType, "The type of the package (alias)")
 
 	// Register the source-specific flags
-	if sourceCfg, ok := cfg.Source.(apkpure.Config); ok {
-		apkpure.ParseFlags(fs, &sourceCfg)
+	if c, ok := sourceCfg.(apkpure.Config); ok {
+		cfg.Source = c
+		apkpure.ParseFlags(fs, &c)
 	}
+	fs.Parse(args[1:])
 }
 
 func validateFlags(cfg Config) string {
