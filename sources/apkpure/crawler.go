@@ -41,7 +41,7 @@ func (c *Crawler) Crawl(packageName, apkType string) ([]apkcrawler.Apk, error) {
 	// Transform the protobuf response into a list of Apk objects
 	for _, app := range apiResult.Data.Detail.ApplicationVersion {
 		// Skip the application if it's not the correct type
-		if !strings.EqualFold(app.Result.Data.Download.Type, apkType) {
+		if apkType != "" && !strings.EqualFold(app.Result.Data.Download.Type, apkType) {
 			continue
 		}
 		apks = append(apks, apkcrawler.Apk{
