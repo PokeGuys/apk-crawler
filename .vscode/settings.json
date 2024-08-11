@@ -1,0 +1,8 @@
+{
+  "go.formatTool": "goimports",
+  "gopls": {
+    "formatting.local": "github.com/pokeguys/apk-crawler"
+  },
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": ["--fast"]
+}

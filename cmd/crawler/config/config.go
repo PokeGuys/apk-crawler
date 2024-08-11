@@ -17,7 +17,7 @@ type Config struct {
 
 const (
 	defaultPackage   = ""
-	defaultApkType   = "APK"
+	defaultApkType   = ""
 	defaultShowAll   = false
 	defaultPrintJSON = false
 )
@@ -67,10 +67,7 @@ func validateFlags(cfg Config) string {
 	}
 
 	// Validate the apk type
-	if cfg.ApkType == "" {
-		message = "apk type flag is required"
-	}
-	if cfg.ApkType != "APK" && cfg.ApkType != "XAPK" {
+	if cfg.ApkType != "" && cfg.ApkType != "APK" && cfg.ApkType != "XAPK" {
 		message = "invalid apk type"
 	}
 

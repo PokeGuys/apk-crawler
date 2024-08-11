@@ -1,7 +1,10 @@
 package apkpure
 
 import (
+	"sort"
 	"strings"
+
+	"golang.org/x/mod/semver"
 
 	apkcrawler "github.com/pokeguys/apk-crawler"
 	"github.com/pokeguys/apk-crawler/sources/apkpure/apkpurehttp"
@@ -41,7 +44,7 @@ func (c *Crawler) Crawl(packageName, apkType string) ([]apkcrawler.Apk, error) {
 	// Transform the protobuf response into a list of Apk objects
 	for _, app := range apiResult.Data.Detail.ApplicationVersion {
 		// Skip the application if it's not the correct type
-		if !strings.EqualFold(app.Result.Data.Download.Type, apkType) {
+		if apkType != "" && !strings.EqualFold(app.Result.Data.Download.Type, apkType) {
 			continue
 		}
 		apks = append(apks, apkcrawler.Apk{
@@ -53,6 +56,10 @@ func (c *Crawler) Crawl(packageName, apkType string) ([]apkcrawler.Apk, error) {
 			Hash:    app.Result.Data.Download.Sha1,
 		})
 	}
-	// The response is already sorted in descending order
+
+	// Sort the APKs by semantic version
+	sort.Slice(apks, func(i, j int) bool {
+		return semver.Compare(apks[i].Version, apks[j].Version) == -1
+	})
 	return apks, nil
 }
