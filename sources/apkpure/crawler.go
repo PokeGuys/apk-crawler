@@ -4,9 +4,10 @@ import (
 	"sort"
 	"strings"
 
+	"golang.org/x/mod/semver"
+
 	apkcrawler "github.com/pokeguys/apk-crawler"
 	"github.com/pokeguys/apk-crawler/sources/apkpure/apkpurehttp"
-	"golang.org/x/mod/semver"
 )
 
 type Crawler struct {
