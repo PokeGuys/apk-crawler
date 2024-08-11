@@ -4,9 +4,9 @@ go 1.22.4
 
 require (
 	github.com/go-resty/resty/v2 v2.11.0
-	github.com/google/uuid v1.6.0
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/stretchr/testify v1.9.0
+	golang.org/x/mod v0.8.0
 	google.golang.org/protobuf v1.34.2
 )
 
